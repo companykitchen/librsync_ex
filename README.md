@@ -1,21 +1,19 @@
 # LibrsyncEx
 
-**TODO: Add description**
+A NIF wrapper library around [librsync](https://librsync.github.io/).
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `librsync_ex` to your list of dependencies in `mix.exs`:
+You'll need to have [librsync](https://librsync.github.io/) installed to build and use this library.
 
-```elixir
-def deps do
-  [
-    {:librsync_ex, "~> 0.1.0"}
-  ]
-end
-```
+## Usage
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/librsync_ex](https://hexdocs.pm/librsync_ex).
+Presently, only the "Whole-file" API from librsync is implemented.
+
+## Roadmap
+
+* V1.X - Implement the "Whole-file" API
+* V2.X - Add the "Streaming jobs" API
+* V3.X - Add the "Pull stream interface" API.
+
 

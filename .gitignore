@@ -22,3 +22,8 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 librsync_ex-*.tar
 
+# Ignore c artifacts
+/c_src/*.o
+/c_src/elixir-env.mk
+/priv
+
