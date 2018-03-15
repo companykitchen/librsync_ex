@@ -9,17 +9,17 @@ defmodule LibrsyncEx do
   @type signature_format :: :blake2 | :md4
 
   @type signature_opts :: [
-    block_length: pos_integer,
-    strong_sum_length: pos_integer,
-    format: signature_format
-  ]
+          block_length: pos_integer,
+          strong_sum_length: pos_integer,
+          format: signature_format
+        ]
 
   # From librsync.h
   @default_block_length 2048
   @default_strong_sum_length 0
   @default_format :blake2
 
-  @spec build_signature_file(String.t, String.t, signature_opts) :: :ok | {:error, any}
+  @spec build_signature_file(String.t(), String.t(), signature_opts) :: :ok | {:error, any}
   def build_signature_file(old_filename, signature_filename, opts \\ []) do
     # Ensure the old file exists before trying to calculate its signature.
     with {:old_file, true} <- {:old_file, File.exists?(old_filename)},
@@ -33,13 +33,19 @@ defmodule LibrsyncEx do
         String.to_charlist(signature_filename),
         block_length,
         strong_sum_length,
-        format)
+        format
+      )
     else
       {:old_file, false} ->
-        :ok = Logger.error "(LibrsyncEx) Couldn't get signature for #{old_filename}. File does not exist."
+        :ok =
+          Logger.error(
+            "(LibrsyncEx) Couldn't get signature for #{old_filename}. File does not exist."
+          )
+
         {:error, :enoent}
+
       {:lib, false} ->
-        :ok = Logger.error "(LibrsyncEx) NIF library not loaded."
+        :ok = Logger.error("(LibrsyncEx) NIF library not loaded.")
         {:error, :nif_not_loaded}
     end
   end
@@ -53,16 +59,27 @@ defmodule LibrsyncEx do
       LibrsyncEx.Nif.nif_rs_delta_file(
         String.to_charlist(signature_filename),
         String.to_charlist(new_filename),
-        String.to_charlist(delta_filename))
+        String.to_charlist(delta_filename)
+      )
     else
       {:sig_file, false} ->
-        :ok = Logger.error "(LibrsyncEx) Couldn't build delta file from signature file #{signature_filename}. Signature file does not exist."
+        :ok =
+          Logger.error(
+            "(LibrsyncEx) Couldn't build delta file from signature file #{signature_filename}. Signature file does not exist."
+          )
+
         {:error, :enoent}
+
       {:new_file, false} ->
-        :ok = Logger.error "(LibrsyncEx) Couldn't build delta file from 'new' file: #{new_filename}. 'New' file does not exist."
+        :ok =
+          Logger.error(
+            "(LibrsyncEx) Couldn't build delta file from 'new' file: #{new_filename}. 'New' file does not exist."
+          )
+
         {:error, :enoent}
+
       {:lib, false} ->
-        :ok = Logger.error "(LibrsyncEx) NIF library not loaded."
+        :ok = Logger.error("(LibrsyncEx) NIF library not loaded.")
         {:error, :nif_not_loaded}
     end
   end
@@ -76,16 +93,27 @@ defmodule LibrsyncEx do
       LibrsyncEx.Nif.nif_rs_patch_file(
         String.to_charlist(basis_filename),
         String.to_charlist(delta_filename),
-        String.to_charlist(new_filename))
+        String.to_charlist(new_filename)
+      )
     else
       {:basis_file, false} ->
-        :ok = Logger.error "(LibrsyncEx) Couldn't patch basis file #{basis_filename}. File does not exist."
+        :ok =
+          Logger.error(
+            "(LibrsyncEx) Couldn't patch basis file #{basis_filename}. File does not exist."
+          )
+
         {:error, :enoent}
+
       {:delta_file, false} ->
-        :ok = Logger.error "(LibrsyncEx) Couldn't patch basis file with delta file: #{delta_filename}. Delta file does not exist."
+        :ok =
+          Logger.error(
+            "(LibrsyncEx) Couldn't patch basis file with delta file: #{delta_filename}. Delta file does not exist."
+          )
+
         {:error, :enoent}
+
       {:lib, false} ->
-        :ok = Logger.error "(LibrsyncEx) NIF library not loaded."
+        :ok = Logger.error("(LibrsyncEx) NIF library not loaded.")
         {:error, :nif_not_loaded}
     end
   end

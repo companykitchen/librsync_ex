@@ -18,8 +18,11 @@ defmodule LibrsyncEx.Nif do
     case :erlang.load_nif(nif_path, 0) do
       :ok ->
         :ok
+
       error ->
-        :ok = Logger.error "(LibrsyncEx) Error loading nif library: #{inspect error, pretty: true}."
+        :ok =
+          Logger.error("(LibrsyncEx) Error loading nif library: #{inspect(error, pretty: true)}.")
+
         :ok
     end
   end
@@ -29,18 +32,24 @@ defmodule LibrsyncEx.Nif do
     false
   end
 
-  @spec nif_rs_sig_file(String.t, String.t, pos_integer, pos_integer, LibrsyncEx.signature_format) :: :ok | {:error, any}
+  @spec nif_rs_sig_file(
+          String.t(),
+          String.t(),
+          pos_integer,
+          pos_integer,
+          LibrsyncEx.signature_format()
+        ) :: :ok | {:error, any}
   def nif_rs_sig_file(_old_filename, _sig_filename, _block_len, _strong_sum_len, _format) do
-    :erlang.nif_error "NIF nif_rs_sig_file/5 not implemented."
+    :erlang.nif_error("NIF nif_rs_sig_file/5 not implemented.")
   end
 
-  @spec nif_rs_delta_file(String.t, String.t, String.t) :: :ok | {:error, any}
+  @spec nif_rs_delta_file(String.t(), String.t(), String.t()) :: :ok | {:error, any}
   def nif_rs_delta_file(_sig_filename, _new_filename, _delta_filename) do
-    :erlang.nif_error "NIF nif_rs_delta_file/3 not implemented."
+    :erlang.nif_error("NIF nif_rs_delta_file/3 not implemented.")
   end
 
-  @spec nif_rs_patch_file(String.t, String.t, String.t) :: :ok | {:error, any}
+  @spec nif_rs_patch_file(String.t(), String.t(), String.t()) :: :ok | {:error, any}
   def nif_rs_patch_file(_basis_filename, _delta_filename, _new_filename) do
-    :erlang.nif_error "NIF nif_rs_patch_file/3 not implemented."
+    :erlang.nif_error("NIF nif_rs_patch_file/3 not implemented.")
   end
 end

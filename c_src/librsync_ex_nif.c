@@ -20,11 +20,13 @@ static void unload(ErlNifEnv *env, void *priv_data) {
 }
 
 // Our NIF functions
-static ERL_NIF_TERM librsync_ex_nif_loaded(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+static ERL_NIF_TERM librsync_ex_nif_loaded(ErlNifEnv *env, int argc,
+                                           const ERL_NIF_TERM argv[]) {
   return ATOM_TRUE;
 }
 
-static ERL_NIF_TERM librsync_ex_nif_rs_sig_file(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+static ERL_NIF_TERM librsync_ex_nif_rs_sig_file(ErlNifEnv *env, int argc,
+                                                const ERL_NIF_TERM argv[]) {
   // Get signature options
   size_t block_len = RS_DEFAULT_BLOCK_LEN;
   size_t strong_len = 0; // Using 0 lets librsync pick a value.
@@ -35,7 +37,7 @@ static ERL_NIF_TERM librsync_ex_nif_rs_sig_file(ErlNifEnv *env, int argc, const 
   }
 
   if (argc >= 4) {
-  enif_get_ulong(env, argv[3], &strong_len);
+    enif_get_ulong(env, argv[3], &strong_len);
   }
 
   if (argc >= 5) {
@@ -56,25 +58,30 @@ static ERL_NIF_TERM librsync_ex_nif_rs_sig_file(ErlNifEnv *env, int argc, const 
   char old_filename[old_fn_length + 1];
   char sig_filename[sig_fn_length + 1];
 
-  enif_get_string(env, argv[0], old_filename, old_fn_length + 1, ERL_NIF_LATIN1);
-  enif_get_string(env, argv[1], sig_filename, sig_fn_length + 1, ERL_NIF_LATIN1);
+  enif_get_string(env, argv[0], old_filename, old_fn_length + 1,
+                  ERL_NIF_LATIN1);
+  enif_get_string(env, argv[1], sig_filename, sig_fn_length + 1,
+                  ERL_NIF_LATIN1);
 
-  FILE *old_file = fopen((const char*)old_filename, "r");
+  FILE *old_file = fopen((const char *)old_filename, "r");
   FILE *sig_file = NULL;
 
   ERL_NIF_TERM nif_result;
 
   if (old_file == NULL) {
-    nif_result = enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, RS_IO_ERROR));
+    nif_result =
+        enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, RS_IO_ERROR));
   } else {
     sig_file = fopen((const char *)sig_filename, "w");
 
-    rs_result result = rs_sig_file(old_file, sig_file, block_len, strong_len, sig_magic_number, NULL);
+    rs_result result = rs_sig_file(old_file, sig_file, block_len, strong_len,
+                                   sig_magic_number, NULL);
 
     if (result == RS_DONE) {
       nif_result = ATOM_OK;
     } else {
-      nif_result = enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, result));
+      nif_result =
+          enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, result));
     }
   }
 
@@ -84,7 +91,8 @@ static ERL_NIF_TERM librsync_ex_nif_rs_sig_file(ErlNifEnv *env, int argc, const 
   return nif_result;
 }
 
-static ERL_NIF_TERM librsync_ex_nif_rs_delta_file(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+static ERL_NIF_TERM librsync_ex_nif_rs_delta_file(ErlNifEnv *env, int argc,
+                                                  const ERL_NIF_TERM argv[]) {
   uint sig_fn_length, new_fn_length, delta_fn_length;
   enif_get_list_length(env, argv[0], &sig_fn_length);
   enif_get_list_length(env, argv[1], &new_fn_length);
@@ -95,9 +103,12 @@ static ERL_NIF_TERM librsync_ex_nif_rs_delta_file(ErlNifEnv *env, int argc, cons
   char new_filename[new_fn_length + 1];
   char delta_filename[delta_fn_length + 1];
 
-  enif_get_string(env, argv[0], sig_filename, sig_fn_length + 1, ERL_NIF_LATIN1);
-  enif_get_string(env, argv[1], new_filename, new_fn_length + 1, ERL_NIF_LATIN1);
-  enif_get_string(env, argv[2], delta_filename, delta_fn_length + 1, ERL_NIF_LATIN1);
+  enif_get_string(env, argv[0], sig_filename, sig_fn_length + 1,
+                  ERL_NIF_LATIN1);
+  enif_get_string(env, argv[1], new_filename, new_fn_length + 1,
+                  ERL_NIF_LATIN1);
+  enif_get_string(env, argv[2], delta_filename, delta_fn_length + 1,
+                  ERL_NIF_LATIN1);
 
   FILE *sig_file = fopen(sig_filename, "r");
   FILE *new_file = fopen(new_filename, "r");
@@ -106,17 +117,20 @@ static ERL_NIF_TERM librsync_ex_nif_rs_delta_file(ErlNifEnv *env, int argc, cons
   ERL_NIF_TERM nif_result;
 
   if (sig_file == NULL || new_file == NULL) {
-    nif_result = enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, RS_IO_ERROR));
+    nif_result =
+        enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, RS_IO_ERROR));
   } else {
     rs_signature_t *sumset;
     rs_result result = rs_loadsig_file(sig_file, &sumset, NULL);
 
     if (result != RS_DONE) {
-      nif_result =  enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, result));
+      nif_result =
+          enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, result));
     } else {
       result = rs_build_hash_table(sumset);
       if (result != RS_DONE) {
-        nif_result = enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, result));
+        nif_result =
+            enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, result));
       } else {
         delta_file = fopen(delta_filename, "w");
         result = rs_delta_file(sumset, new_file, delta_file, NULL);
@@ -124,7 +138,8 @@ static ERL_NIF_TERM librsync_ex_nif_rs_delta_file(ErlNifEnv *env, int argc, cons
         if (result == RS_DONE) {
           nif_result = ATOM_OK;
         } else {
-          nif_result = enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, result));
+          nif_result =
+              enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, result));
         }
       }
     }
@@ -137,7 +152,8 @@ static ERL_NIF_TERM librsync_ex_nif_rs_delta_file(ErlNifEnv *env, int argc, cons
   return nif_result;
 }
 
-static ERL_NIF_TERM librsync_ex_nif_rs_patch_file(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+static ERL_NIF_TERM librsync_ex_nif_rs_patch_file(ErlNifEnv *env, int argc,
+                                                  const ERL_NIF_TERM argv[]) {
   uint basis_fn_length, delta_fn_length, new_fn_length;
   enif_get_list_length(env, argv[0], &basis_fn_length);
   enif_get_list_length(env, argv[1], &delta_fn_length);
@@ -148,9 +164,12 @@ static ERL_NIF_TERM librsync_ex_nif_rs_patch_file(ErlNifEnv *env, int argc, cons
   char delta_filename[delta_fn_length + 1];
   char new_filename[new_fn_length + 1];
 
-  enif_get_string(env, argv[0], basis_filename, basis_fn_length + 1, ERL_NIF_LATIN1);
-  enif_get_string(env, argv[1], delta_filename, delta_fn_length + 1, ERL_NIF_LATIN1);
-  enif_get_string(env, argv[2], new_filename, new_fn_length + 1, ERL_NIF_LATIN1);
+  enif_get_string(env, argv[0], basis_filename, basis_fn_length + 1,
+                  ERL_NIF_LATIN1);
+  enif_get_string(env, argv[1], delta_filename, delta_fn_length + 1,
+                  ERL_NIF_LATIN1);
+  enif_get_string(env, argv[2], new_filename, new_fn_length + 1,
+                  ERL_NIF_LATIN1);
 
   FILE *basis_file = fopen(basis_filename, "r");
   FILE *delta_file = fopen(delta_filename, "r");
@@ -159,7 +178,8 @@ static ERL_NIF_TERM librsync_ex_nif_rs_patch_file(ErlNifEnv *env, int argc, cons
   ERL_NIF_TERM nif_result;
 
   if (basis_file == NULL || delta_file == NULL) {
-    nif_result = enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, RS_IO_ERROR));
+    nif_result =
+        enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, RS_IO_ERROR));
   } else {
     new_file = fopen(new_filename, "w");
     rs_result result = rs_patch_file(basis_file, delta_file, new_file, NULL);
@@ -167,7 +187,8 @@ static ERL_NIF_TERM librsync_ex_nif_rs_patch_file(ErlNifEnv *env, int argc, cons
     if (result == RS_DONE) {
       nif_result = ATOM_OK;
     } else {
-      nif_result = enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, result));
+      nif_result =
+          enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, result));
     }
   }
 

@@ -10,9 +10,9 @@ defmodule LibrsyncExTest do
 
     File.mkdir_p!(path)
 
-    on_exit fn ->
-      File.rm_rf! path
-    end
+    on_exit(fn ->
+      File.rm_rf!(path)
+    end)
 
     {:ok, path: path}
   end
@@ -137,7 +137,7 @@ defmodule LibrsyncExTest do
     end
   end
 
-  describe "end-to-end 10K bytes of data"do
+  describe "end-to-end 10K bytes of data" do
     setup %{path: path} do
       original = :crypto.strong_rand_bytes(10240)
       filepath = Path.join(path, "10240-byte-data")
@@ -208,7 +208,7 @@ defmodule LibrsyncExTest do
 
   describe "end-to-end 100K bytes of data" do
     setup %{path: path} do
-      original = :crypto.strong_rand_bytes(102400)
+      original = :crypto.strong_rand_bytes(102_400)
       filepath = Path.join(path, "102400-byte-data")
       File.write!(filepath, original)
 
@@ -238,7 +238,7 @@ defmodule LibrsyncExTest do
 
     test "change last byte", %{path: path, filepath: filepath} do
       assert {:ok, original} = File.read(filepath)
-      <<rest::binary-size(102399), _::binary>> = original
+      <<rest::binary-size(102_399), _::binary>> = original
       new_version = rest <> "Z"
       changed_filepath = Path.join(path, "102400-byte-data-updated")
       File.write!(changed_filepath, new_version)
@@ -307,7 +307,7 @@ defmodule LibrsyncExTest do
 
     test "change last byte", %{path: path, filepath: filepath} do
       assert {:ok, original} = File.read(filepath)
-      <<rest::binary-size(1048575), _::binary>> = original
+      <<rest::binary-size(1_048_575), _::binary>> = original
       new_version = rest <> "Z"
       changed_filepath = Path.join(path, "1048576-byte-data-updated")
       File.write!(changed_filepath, new_version)
@@ -326,7 +326,7 @@ defmodule LibrsyncExTest do
 
     test "change byte in the middle", %{path: path, filepath: filepath} do
       assert {:ok, original} = File.read(filepath)
-      <<first::binary-size(524287), _::binary-size(1), rest::binary>> = original
+      <<first::binary-size(524_287), _::binary-size(1), rest::binary>> = original
       new_version = first <> "Z" <> rest
       changed_filepath = Path.join(path, "1048576-byte-data-updated")
       File.write!(changed_filepath, new_version)
