@@ -8,6 +8,9 @@ static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
   ATOM_OK = enif_make_atom(env, "ok");
   ATOM_TRUE = enif_make_atom(env, "true");
 
+  ATOM_BLAKE2 = enif_make_atom(env, "blake2");
+  ATOM_MD4 = enif_make_atom(env, "md4");
+
   return 0;
 }
 
@@ -22,6 +25,29 @@ static ERL_NIF_TERM librsync_ex_nif_loaded(ErlNifEnv *env, int argc, const ERL_N
 }
 
 static ERL_NIF_TERM librsync_ex_nif_rs_sig_file(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+  // Get signature options
+  size_t block_len = RS_DEFAULT_BLOCK_LEN;
+  size_t strong_len = 0; // Using 0 lets librsync pick a value.
+  rs_magic_number sig_magic_number = RS_BLAKE2_SIG_MAGIC;
+
+  if (argc >= 3) {
+    enif_get_ulong(env, argv[2], &block_len);
+  }
+
+  if (argc >= 4) {
+  enif_get_ulong(env, argv[3], &strong_len);
+  }
+
+  if (argc >= 5) {
+    char magic_number_atom[128];
+    enif_get_atom(env, argv[4], magic_number_atom, 128, ERL_NIF_LATIN1);
+
+    if (strcmp(magic_number_atom, "md4") == 0) {
+      sig_magic_number = RS_MD4_SIG_MAGIC;
+    }
+  }
+
+  // Get filenames
   uint old_fn_length, sig_fn_length;
   enif_get_list_length(env, argv[0], &old_fn_length);
   enif_get_list_length(env, argv[1], &sig_fn_length);
@@ -43,7 +69,7 @@ static ERL_NIF_TERM librsync_ex_nif_rs_sig_file(ErlNifEnv *env, int argc, const 
   } else {
     sig_file = fopen((const char *)sig_filename, "w");
 
-    rs_result result = rs_sig_file(old_file, sig_file, RS_DEFAULT_BLOCK_LEN, RS_MAX_STRONG_SUM_LENGTH, RS_BLAKE2_SIG_MAGIC, NULL);
+    rs_result result = rs_sig_file(old_file, sig_file, block_len, strong_len, sig_magic_number, NULL);
 
     if (result == RS_DONE) {
       nif_result = ATOM_OK;
@@ -112,7 +138,7 @@ static ERL_NIF_TERM librsync_ex_nif_rs_delta_file(ErlNifEnv *env, int argc, cons
 }
 
 static ERL_NIF_TERM librsync_ex_nif_rs_patch_file(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-  int basis_fn_length, delta_fn_length, new_fn_length;
+  uint basis_fn_length, delta_fn_length, new_fn_length;
   enif_get_list_length(env, argv[0], &basis_fn_length);
   enif_get_list_length(env, argv[1], &delta_fn_length);
   enif_get_list_length(env, argv[2], &new_fn_length);

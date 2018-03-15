@@ -4,12 +4,16 @@ defmodule LibrsyncEx.MixProject do
   def project do
     [
       app: :librsync_ex,
-      version: "0.1.0",
+      version: "0.2.0",
       elixir: "~> 1.4",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       compilers: [:elixir_make | Mix.compilers()],
-      make_clean: ["clean", "distclean"]
+      make_clean: ["clean", "distclean"],
+      dialyzer_warnings: [:unmatched_returns, :error_handling, :race_conditions, :unknown],
+      dialyzer_ignored_warnings: [
+        {:warn_contract_supertype, :_, {:extra_range, [:_, :__protocol__, 1, :_, :_]}}
+      ]
     ]
   end
 
