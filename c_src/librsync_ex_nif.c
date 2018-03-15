@@ -50,7 +50,7 @@ static ERL_NIF_TERM librsync_ex_nif_rs_sig_file(ErlNifEnv *env, int argc,
   }
 
   // Get filenames
-  uint old_fn_length, sig_fn_length;
+  unsigned int old_fn_length, sig_fn_length;
   enif_get_list_length(env, argv[0], &old_fn_length);
   enif_get_list_length(env, argv[1], &sig_fn_length);
 
@@ -93,7 +93,7 @@ static ERL_NIF_TERM librsync_ex_nif_rs_sig_file(ErlNifEnv *env, int argc,
 
 static ERL_NIF_TERM librsync_ex_nif_rs_delta_file(ErlNifEnv *env, int argc,
                                                   const ERL_NIF_TERM argv[]) {
-  uint sig_fn_length, new_fn_length, delta_fn_length;
+  unsigned int sig_fn_length, new_fn_length, delta_fn_length;
   enif_get_list_length(env, argv[0], &sig_fn_length);
   enif_get_list_length(env, argv[1], &new_fn_length);
   enif_get_list_length(env, argv[2], &delta_fn_length);
@@ -154,7 +154,7 @@ static ERL_NIF_TERM librsync_ex_nif_rs_delta_file(ErlNifEnv *env, int argc,
 
 static ERL_NIF_TERM librsync_ex_nif_rs_patch_file(ErlNifEnv *env, int argc,
                                                   const ERL_NIF_TERM argv[]) {
-  uint basis_fn_length, delta_fn_length, new_fn_length;
+  unsigned int basis_fn_length, delta_fn_length, new_fn_length;
   enif_get_list_length(env, argv[0], &basis_fn_length);
   enif_get_list_length(env, argv[1], &delta_fn_length);
   enif_get_list_length(env, argv[2], &new_fn_length);
