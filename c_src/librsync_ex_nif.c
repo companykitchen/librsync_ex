@@ -2,24 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 
-// Caller is responsible for cleanup.
-static char *get_string_from_binary(ErlNifBinary bin) {
-  // + 1 for null terminator
-  char *string = malloc(bin.size + 1);
-  memcpy(string, bin.data, bin.size);
-
-  // Add the null terminator on the end.
-  string[bin.size] = '\0';
-
-  return string;
-}
-
-static char *get_string_from_binary_term(ErlNifEnv* env, ERL_NIF_TERM bin_term) {
-  ErlNifBinary bin;
-  enif_inspect_binary(env, bin_term, &bin);
-  return get_string_from_binary(bin);
-}
-
 // NIF lifecycle functions
 static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
   ATOM_ERROR = enif_make_atom(env, "error");
@@ -40,8 +22,16 @@ static ERL_NIF_TERM librsync_ex_nif_loaded(ErlNifEnv *env, int argc, const ERL_N
 }
 
 static ERL_NIF_TERM librsync_ex_nif_rs_sig_file(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-  const char* old_filename = get_string_from_binary_term(env, argv[0]);
-  const char* sig_filename = get_string_from_binary_term(env, argv[1]);
+  uint old_fn_length, sig_fn_length;
+  enif_get_list_length(env, argv[0], &old_fn_length);
+  enif_get_list_length(env, argv[1], &sig_fn_length);
+
+  // + 1 for null terminator
+  char old_filename[old_fn_length + 1];
+  char sig_filename[sig_fn_length + 1];
+
+  enif_get_string(env, argv[0], old_filename, old_fn_length + 1, ERL_NIF_LATIN1);
+  enif_get_string(env, argv[1], sig_filename, sig_fn_length + 1, ERL_NIF_LATIN1);
 
   FILE *old_file = fopen((const char*)old_filename, "r");
   FILE *sig_file = NULL;
@@ -62,9 +52,6 @@ static ERL_NIF_TERM librsync_ex_nif_rs_sig_file(ErlNifEnv *env, int argc, const 
     }
   }
 
-  free((void *)old_filename);
-  free((void *)sig_filename);
-
   fclose(old_file);
   fclose(sig_file);
 
@@ -72,9 +59,19 @@ static ERL_NIF_TERM librsync_ex_nif_rs_sig_file(ErlNifEnv *env, int argc, const 
 }
 
 static ERL_NIF_TERM librsync_ex_nif_rs_delta_file(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-  const char *sig_filename = get_string_from_binary_term(env, argv[0]);
-  const char *new_filename = get_string_from_binary_term(env, argv[1]);
-  const char *delta_filename = get_string_from_binary_term(env, argv[2]);
+  uint sig_fn_length, new_fn_length, delta_fn_length;
+  enif_get_list_length(env, argv[0], &sig_fn_length);
+  enif_get_list_length(env, argv[1], &new_fn_length);
+  enif_get_list_length(env, argv[2], &delta_fn_length);
+
+  // + 1 for null terminator
+  char sig_filename[sig_fn_length + 1];
+  char new_filename[new_fn_length + 1];
+  char delta_filename[delta_fn_length + 1];
+
+  enif_get_string(env, argv[0], sig_filename, sig_fn_length + 1, ERL_NIF_LATIN1);
+  enif_get_string(env, argv[1], new_filename, new_fn_length + 1, ERL_NIF_LATIN1);
+  enif_get_string(env, argv[2], delta_filename, delta_fn_length + 1, ERL_NIF_LATIN1);
 
   FILE *sig_file = fopen(sig_filename, "r");
   FILE *new_file = fopen(new_filename, "r");
@@ -107,10 +104,6 @@ static ERL_NIF_TERM librsync_ex_nif_rs_delta_file(ErlNifEnv *env, int argc, cons
     }
   }
 
-  free((void *)sig_filename);
-  free((void *)new_filename);
-  free((void *)delta_filename);
-
   fclose(sig_file);
   fclose(new_file);
   fclose(delta_file);
@@ -119,9 +112,19 @@ static ERL_NIF_TERM librsync_ex_nif_rs_delta_file(ErlNifEnv *env, int argc, cons
 }
 
 static ERL_NIF_TERM librsync_ex_nif_rs_patch_file(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-  const char *basis_filename = get_string_from_binary_term(env, argv[0]);
-  const char *delta_filename = get_string_from_binary_term(env, argv[1]);
-  const char *new_filename = get_string_from_binary_term(env, argv[2]);
+  int basis_fn_length, delta_fn_length, new_fn_length;
+  enif_get_list_length(env, argv[0], &basis_fn_length);
+  enif_get_list_length(env, argv[1], &delta_fn_length);
+  enif_get_list_length(env, argv[2], &new_fn_length);
+
+  // + 1 for null terminator
+  char basis_filename[basis_fn_length + 1];
+  char delta_filename[delta_fn_length + 1];
+  char new_filename[new_fn_length + 1];
+
+  enif_get_string(env, argv[0], basis_filename, basis_fn_length + 1, ERL_NIF_LATIN1);
+  enif_get_string(env, argv[1], delta_filename, delta_fn_length + 1, ERL_NIF_LATIN1);
+  enif_get_string(env, argv[2], new_filename, new_fn_length + 1, ERL_NIF_LATIN1);
 
   FILE *basis_file = fopen(basis_filename, "r");
   FILE *delta_file = fopen(delta_filename, "r");
@@ -141,10 +144,6 @@ static ERL_NIF_TERM librsync_ex_nif_rs_patch_file(ErlNifEnv *env, int argc, cons
       nif_result = enif_make_tuple2(env, ATOM_ERROR, enif_make_int(env, result));
     }
   }
-
-  free((void *)basis_filename);
-  free((void *)delta_filename);
-  free((void *)new_filename);
 
   fclose(basis_file);
   fclose(delta_file);

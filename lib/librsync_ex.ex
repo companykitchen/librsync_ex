@@ -8,7 +8,9 @@ defmodule LibrsyncEx do
     if File.exists?(old_filename) == false do
       {:error, :enoent}
     else
-      LibrsyncEx.Nif.nif_rs_sig_file(old_filename, signature_filename)
+      LibrsyncEx.Nif.nif_rs_sig_file(
+        String.to_charlist(old_filename),
+        String.to_charlist(signature_filename))
     end
   end
 
@@ -18,7 +20,10 @@ defmodule LibrsyncEx do
     unless File.exists?(signature_filename) && File.exists?(new_filename) do
       {:error, :enoent}
     else
-      LibrsyncEx.Nif.nif_rs_delta_file(signature_filename, new_filename, delta_filename)
+      LibrsyncEx.Nif.nif_rs_delta_file(
+        String.to_charlist(signature_filename),
+        String.to_charlist(new_filename),
+        String.to_charlist(delta_filename))
     end
   end
 
@@ -28,7 +33,10 @@ defmodule LibrsyncEx do
     unless File.exists?(basis_filename) && File.exists?(delta_filename) do
       {:error, :enoent}
     else
-      LibrsyncEx.Nif.nif_rs_patch_file(basis_filename, delta_filename, new_filename)
+      LibrsyncEx.Nif.nif_rs_patch_file(
+        String.to_charlist(basis_filename),
+        String.to_charlist(delta_filename),
+        String.to_charlist(new_filename))
     end
   end
 end
