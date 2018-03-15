@@ -8,7 +8,7 @@ PRIV_DIR ?= $(BASEDIR)/priv
 C_SRC_DIR ?= $(BASEDIR)/c_src
 C_SRC_ENV ?= $(C_SRC_DIR)/elixir-env.mk
 
-C_SRC_LIBRSYNC_NIF ?= $(PRIV_DIR)/librsync_nif
+C_SRC_LIBRSYNC_NIF ?= $(PRIV_DIR)/librsync_ex_nif
 
 # "erl" command used for fetching erl include/lib directory locations
 ERL = erl +A0 -noinput -boot start_clean
@@ -82,7 +82,7 @@ endif
 CFLAGS += -I"$(ERTS_INCLUDE_DIR)" -I"$(ERL_INTERFACE_INCLUDE_DIR)"
 CXXFLAGS += -I"$(ERTS_INCLUDE_DIR)" -I"$(ERL_INTERFACE_INCLUDE_DIR)"
 
-LDLIBS += -L"$(ERL_INTERFACE_LIB_DIR)" -lerl_interface -lei
+LDLIBS += -L"$(ERL_INTERFACE_LIB_DIR)" -lerl_interface -lei -lrsync
 
 # Verbosity.
 ifeq ($(VERBOSE),)
